@@ -21,16 +21,16 @@ import java.util.List;
 public class PlanDay {
 
     @EqualsAndHashCode.Include
-    private final long id;
-    private LocalDate date;   // ключове поле, бо алгоритм працює з розподілом по днях;
+    private long dayId;
+    private LocalDate date;
+    private String description;
 
     @Builder.Default
     private List<PackageWithProducts> packages = new ArrayList<>();
 
-    // optional helper (useful in imports)
-    public PlanDay() {
-        this.id = 0;
-        this.date = LocalDate.now();
-        this.packages = new ArrayList<>();
+    public double getTotalWeight() {
+        return packages.stream()
+                .mapToDouble(p -> p.getDayWeights().values().stream().mapToDouble(Double::doubleValue).sum())
+                .sum();
     }
 }

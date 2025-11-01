@@ -18,11 +18,6 @@ public class Hiker {
     @EqualsAndHashCode.Include
     private final long id;
     private String name;
-    private double loadRatio;
-
-    public Hiker() {
-        this.id = 0;
-        this.name = "";
-        this.loadRatio = 1.0;
-    }
+    private String description;
+    private double weightCoefficient;
 }

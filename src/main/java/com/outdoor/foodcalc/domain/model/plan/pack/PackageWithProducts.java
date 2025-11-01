@@ -1,10 +1,11 @@
 package com.outdoor.foodcalc.domain.model.plan.pack;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,10 +18,50 @@ import java.util.Map;
 @Builder(toBuilder = true)
 public class PackageWithProducts {
 
-    private String name;                      // назва пакунку (тушонка, каша і т.д.)
-    private Map<Integer, Double> dayWeights;  // день → вага, у грамах
+    @EqualsAndHashCode.Include
+    private String name;
+    private double volumeCoefficient;
+    private double additionalWeight;
+    private double fullWeight;
 
-    public double getTotalWeight() {
-        return dayWeights == null ? 0.0 : dayWeights.values().stream().mapToDouble(Double::doubleValue).sum();
+    /** Вага пакунка по днях (наприклад, тушонка (110, 100, 90, 0)) */
+    @Builder.Default
+    private Map<LocalDate, Double> dayWeights = new LinkedHashMap<>();
+
+    /** Продукти в пакунку (спрощено) */
+    @Builder.Default
+    private List<String> products = new ArrayList<>();
+
+    /** Отримати вагу для конкретного дня */
+    public double getWeightForDay(LocalDate date, int membersCount) {
+        return dayWeights.getOrDefault(date, 0.0);
+    }
+
+    /** Сумарна вага пакунка */
+    public double getProductsWeight() {
+        return dayWeights.values().stream().mapToDouble(Double::doubleValue).sum();
+    }
+
+    /** Повернути "псевдо-обгортку" пакунка для логування */
+    public FoodPackage getFoodPackage() {
+        return FoodPackage.builder()
+                .name(name)
+                .volumeCoefficient(volumeCoefficient)
+                .additionalWeight(additionalWeight)
+                .fullWeight(fullWeight)
+                .build();
+    }
+
+    /** Список днів використання пакунка */
+    public List<LocalDate> getPackageDays() {
+        return new ArrayList<>(dayWeights.keySet());
+    }
+
+    /** Клонування пакунка */
+    public PackageWithProducts clonePackage() {
+        PackageWithProducts copy = this.toBuilder().build();
+        copy.setDayWeights(new LinkedHashMap<>(this.dayWeights));
+        copy.setProducts(new ArrayList<>(this.products));
+        return copy;
     }
 }

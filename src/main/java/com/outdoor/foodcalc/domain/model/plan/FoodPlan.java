@@ -1,10 +1,12 @@
 package com.outdoor.foodcalc.domain.model.plan;
 
+import com.outdoor.foodcalc.domain.model.plan.pack.FoodPackage;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +24,7 @@ public class FoodPlan {
     private final long id;
     private String name;
     private String description;
+    private String schemaVersion;
 
     @Builder.Default
     private List<PlanDay> days = new ArrayList<>();
@@ -29,12 +32,10 @@ public class FoodPlan {
     @Builder.Default
     private List<Hiker> members = new ArrayList<>();
 
-    // convenience constructor
-    public FoodPlan() {
-        this.id = 0;
-        this.name = "";
-        this.description = "";
-        this.days = new ArrayList<>();
-        this.members = new ArrayList<>();
+    @Builder.Default
+    private List<FoodPackage> packages = new ArrayList<>();
+
+    public PlanDay findDayByDate(LocalDate date) {
+        return days.stream().filter(d -> d.getDate().equals(date)).findFirst().orElse(null);
     }
 }

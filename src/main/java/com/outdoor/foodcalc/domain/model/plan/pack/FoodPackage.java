@@ -1,9 +1,10 @@
 package com.outdoor.foodcalc.domain.model.plan.pack;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.time.LocalDate;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Simplified FoodPackage class used for compatibility.
@@ -14,6 +15,21 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true)
 public class FoodPackage {
 
+    @EqualsAndHashCode.Include
     private String name;
-    private double totalWeight;
+    private double volumeCoefficient;
+    private double additionalWeight;
+    private double fullWeight;
+
+    @Builder.Default
+    private Map<LocalDate, Double> dayWeights = new LinkedHashMap<>();
+
+    public double getWeightForDay(LocalDate date) {
+        return dayWeights.getOrDefault(date, 0.0);
+    }
+
+    public double getTotalWeight() {
+        return dayWeights.values().stream().mapToDouble(Double::doubleValue).sum();
+    }
+
 }
