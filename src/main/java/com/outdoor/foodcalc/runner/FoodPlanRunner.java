@@ -1,6 +1,7 @@
 package com.outdoor.foodcalc.runner;
 
 import com.outdoor.foodcalc.domain.model.plan.FoodPlan;
+import com.outdoor.foodcalc.domain.model.plan.pack.HikerState;
 import com.outdoor.foodcalc.domain.service.ExcelExportService;
 import com.outdoor.foodcalc.domain.service.ExcelFoodPlanParser;
 import com.outdoor.foodcalc.domain.service.ManualBnBDistributionService;
@@ -9,6 +10,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.List;
 
 public class FoodPlanRunner {
 
@@ -22,11 +24,19 @@ public class FoodPlanRunner {
             System.out.println("Plan loaded: " + plan.getName());
 
             // Запустити алгоритм розподілу
-//            ManualBnBDistributionService service = new ManualBnBDistributionService();
-//            FoodPlan result = service.distribute(plan);
-//            System.out.println("Distribution complete!");
-//
-//            // Експортувати результат у новий Excel
+            ManualBnBDistributionService service = new ManualBnBDistributionService();
+            List<HikerState> result = service.findBestDistribution(plan);
+
+            System.out.println("Result");
+            for (HikerState state : result) {
+                System.out.println(state);
+            }
+
+
+
+
+
+// Експортувати результат у новий Excel
 //            ExcelExportService exporter = new ExcelExportService();
 //            XSSFWorkbook workbook = exporter.exportFoodPlan(result);
 //
