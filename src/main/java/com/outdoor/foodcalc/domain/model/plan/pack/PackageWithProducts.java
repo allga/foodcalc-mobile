@@ -37,6 +37,12 @@ public class PackageWithProducts {
         return dayWeights.getOrDefault(date, 0.0);
     }
 
+    /** Обчислити орієнтовну вагу пакунку з коефіцієнтом об'єму та вагою пакування */
+    public double getEstimatedWeight() {
+        double weight = getProductsWeight();
+        return weight * volumeCoefficient + additionalWeight;
+    }
+
     /** Сумарна вага пакунка */
     public double getProductsWeight() {
         return dayWeights.values().stream().mapToDouble(Double::doubleValue).sum();

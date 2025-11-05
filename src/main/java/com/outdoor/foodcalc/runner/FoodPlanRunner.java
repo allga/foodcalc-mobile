@@ -1,6 +1,7 @@
 package com.outdoor.foodcalc.runner;
 
 import com.outdoor.foodcalc.domain.model.plan.FoodPlan;
+import com.outdoor.foodcalc.domain.model.plan.PlanDay;
 import com.outdoor.foodcalc.domain.model.plan.pack.HikerState;
 import com.outdoor.foodcalc.domain.service.ExcelExportService;
 import com.outdoor.foodcalc.domain.service.ExcelFoodPlanParser;
@@ -11,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class FoodPlanRunner {
 
@@ -27,25 +29,20 @@ public class FoodPlanRunner {
             ManualBnBDistributionService service = new ManualBnBDistributionService();
             List<HikerState> result = service.findBestDistribution(plan);
 
-            System.out.println("Result");
+            // Експорт результатів розподілу
+            ExcelExportService exporter = new ExcelExportService();
+            try (XSSFWorkbook workbook = exporter.exportFoodPlan(
+                    plan, result, plan.getPackages(), plan.getDays().stream()
+                            .map(PlanDay::getDate).collect(Collectors.toList()));
+                 FileOutputStream out = new FileOutputStream("D:/foodcalcData/foodplan_result.xlsx")) {
+
+                workbook.write(out);
+                System.out.println("Result exported to: D:/foodcalcData/foodplan_result.xlsx");
+            }
+
             for (HikerState state : result) {
                 System.out.println(state);
             }
-
-
-
-
-
-// Експортувати результат у новий Excel
-//            ExcelExportService exporter = new ExcelExportService();
-//            XSSFWorkbook workbook = exporter.exportFoodPlan(result);
-//
-//            String outputPath = "D:/foodplan_result.xlsx";
-//            try (FileOutputStream out = new FileOutputStream(outputPath)) {
-//                workbook.write(out);
-//            }
-//
-//            System.out.println("Result exported to: " + outputPath);
 
         } catch (Exception e) {
             e.printStackTrace();
