@@ -17,7 +17,6 @@ public class ManualBnBDistributionService {
     private List<LocalDate> sortedDates;
     private Map<LocalDate, List<PackageWithProducts>> packagesByDate;
     private List<HikerState> bestSolution;
-    private int membersCount;
     private double bestDeviation = Double.MAX_VALUE;
     private static final double TOLERANCE = 0.10;
 
@@ -25,9 +24,9 @@ public class ManualBnBDistributionService {
     // Головний метод — пошук найкращого розподілу
     public List<HikerState> findBestDistribution(FoodPlan plan) {
 
-        this.membersCount = plan.getMembers().size();
         List<PackageWithProducts> packages = plan.getPackages();
         prepareData(packages);
+
         // Ініціалізація станів туристів
         List<HikerState> hikers = plan.getMembers().stream()
                 .map(HikerState::new)
@@ -99,7 +98,7 @@ public class ManualBnBDistributionService {
                                      int dayIndex) {
 
         if (remaining.isEmpty()) {
-            // Якщо пакунків на цей день більше немає кожен турист має бути в межах [90%; 110%] таргета
+            // Якщо пакунків на цей день більше немає, кожен турист має бути завантажений мінімум на 90% від таргета
             for (HikerState hiker : hikers) {
                 double target = hiker.getTargetByDay().getOrDefault(currentDay, 0.0);
                 double load = hiker.getLoadForDay(currentDay);
@@ -113,7 +112,6 @@ public class ManualBnBDistributionService {
 
             if (dayIndex < sortedDates.size() - 1) {
                 branchAndBound(dayIndex + 1, hikers);
-                return;
 
             } else {
                 // Перевіряємо остаточну допустимість рішення перед збереженням
@@ -123,15 +121,12 @@ public class ManualBnBDistributionService {
                     for (LocalDate day : sortedDates) {
                         double target = hiker.getTargetByDay().getOrDefault(day, 0.0);
                         if (target == 0.0) continue;
+
                         double load = hiker.getLoadForDay(day);
                         double minAllowed = target * (1 - TOLERANCE);
                         double maxAllowed = target * (1 + TOLERANCE);
 
-                        if (load < minAllowed || load > maxAllowed) {
-                            valid = false;
-                            System.out.printf("Invalid final day %s: %s load=%.1f, target=%.1f%n",
-                                    day, hiker.getHiker().getName(), load, target);
-                        }
+                        if (load < minAllowed || load > maxAllowed) valid = false;
                     }
                 }
 
@@ -172,7 +167,7 @@ public class ManualBnBDistributionService {
                     .orElseThrow();
 
             // Додаємо пакунок у копію (а не в оригінал)
-            currentHiker.addPackage(currentPackage, membersCount);
+            currentHiker.addPackage(currentPackage);
 
             // Перевіряємо допустимість
             if (isFeasible(currentHiker, currentPackage, currentDay))
@@ -189,8 +184,7 @@ public class ManualBnBDistributionService {
             if (day.isBefore(currentDay)) continue; // пропускаємо попередні дні
 
             // Отримуємо вже розрахований таргет
-            Double target = hiker.getTargetByDay().get(day);
-            if (target == null) return false;
+            double target = hiker.getTargetByDay().getOrDefault(day, 0.0);
 
             // Поточне навантаження (включно з усіма призначеними пакунками)
             double load = hiker.getLoadForDay(day);
@@ -200,8 +194,7 @@ public class ManualBnBDistributionService {
 
             // Перевіряємо чи навантаження в межах
             // Якщо розподіл ще триває — перевіряємо тільки верхню межу
-            boolean feasible = load <= maxAllowed;
-            if (!feasible) return false;
+            if (load > maxAllowed) return false;
         }
 
         return true;
@@ -220,15 +213,25 @@ public class ManualBnBDistributionService {
     // Групування пакунків за датами
     private void prepareData(List<PackageWithProducts> packages) {
         packagesByDate = new HashMap<>();
+
         for (PackageWithProducts pack : packages) {
-            for (LocalDate d : pack.getDayWeights().keySet()) {
-                packagesByDate.computeIfAbsent(d, k -> new ArrayList<>()).add(pack);
+            for (Map.Entry<LocalDate, Double> entry : pack.getDayWeights().entrySet()) {
+                LocalDate day = entry.getKey();
+                double weight = entry.getValue();
+
+                // фільтруємо тільки дні, де вага > 0
+                if (weight > 0) {
+                    packagesByDate
+                            .computeIfAbsent(day, k -> new ArrayList<>())
+                            .add(pack);
+                }
             }
         }
+
         sortedDates = new ArrayList<>(packagesByDate.keySet());
         sortedDates.sort(Comparator.reverseOrder());
     }
-    
+
     // Розрахунок групових таргетів для кожного дня
     private Map<LocalDate, Double> calculateGroupTargets(List<LocalDate> days) {
         Map<LocalDate, Double> groupTargets = new HashMap<>();

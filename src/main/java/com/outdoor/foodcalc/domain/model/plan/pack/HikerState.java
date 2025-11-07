@@ -44,7 +44,7 @@ public class HikerState {
     }
 
     /** Додати пакунок туристу з урахуванням кількості учасників */
-    public void addPackage(PackageWithProducts pack, int membersCount) {
+    public void addPackage(PackageWithProducts pack) {
         pack.getDayWeights().forEach((day, weight) -> {
             loadByDay.merge(day, weight, Double::sum);
             assignPackage(day, pack);
