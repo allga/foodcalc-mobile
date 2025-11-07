@@ -20,8 +20,6 @@ public class PackageWithProducts {
 
     @EqualsAndHashCode.Include
     private String name;
-    private double volumeCoefficient;
-    private double additionalWeight;
     private double fullWeight;
 
     /** Вага пакунка по днях (наприклад, тушонка (110, 100, 90, 0)) */
@@ -33,14 +31,8 @@ public class PackageWithProducts {
     private List<String> products = new ArrayList<>();
 
     /** Отримати вагу для конкретного дня */
-    public double getWeightForDay(LocalDate date, int membersCount) {
+    public double getWeightForDay(LocalDate date) {
         return dayWeights.getOrDefault(date, 0.0);
-    }
-
-    /** Обчислити орієнтовну вагу пакунку з коефіцієнтом об'єму та вагою пакування */
-    public double getEstimatedWeight() {
-        double weight = getProductsWeight();
-        return weight * volumeCoefficient + additionalWeight;
     }
 
     /** Сумарна вага пакунка */
@@ -52,8 +44,6 @@ public class PackageWithProducts {
     public FoodPackage getFoodPackage() {
         return FoodPackage.builder()
                 .name(name)
-                .volumeCoefficient(volumeCoefficient)
-                .additionalWeight(additionalWeight)
                 .fullWeight(fullWeight)
                 .build();
     }
@@ -63,11 +53,4 @@ public class PackageWithProducts {
         return new ArrayList<>(dayWeights.keySet());
     }
 
-    /** Клонування пакунка */
-    public PackageWithProducts clonePackage() {
-        PackageWithProducts copy = this.toBuilder().build();
-        copy.setDayWeights(new LinkedHashMap<>(this.dayWeights));
-        copy.setProducts(new ArrayList<>(this.products));
-        return copy;
-    }
 }
