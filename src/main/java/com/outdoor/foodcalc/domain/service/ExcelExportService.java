@@ -112,7 +112,7 @@ public class ExcelExportService {
             row.createCell(1).setCellValue(packages);
 
             double totalWeight = hiker.getAssignedPackages().stream()
-                    .mapToDouble(PackageWithProducts::getEstimatedWeight)
+                    .mapToDouble(PackageWithProducts::getProductsWeight)
                     .sum();
 
             Cell weightCell = row.createCell(2);
@@ -207,8 +207,8 @@ public class ExcelExportService {
         Row header = sheet.createRow(rowNum++);
         int col = 0;
         header.createCell(col++).setCellValue("name");
-        header.createCell(col++).setCellValue("vol coef");
-        header.createCell(col++).setCellValue("addPack");
+//        header.createCell(col++).setCellValue("vol coef");
+//        header.createCell(col++).setCellValue("addPack");
         header.createCell(col++).setCellValue("full");
 
         List<LocalDate> reversedDates = new ArrayList<>(sortedDates);
@@ -227,21 +227,21 @@ public class ExcelExportService {
 
             row.createCell(c++).setCellValue(pack.getFoodPackage().getName());
 
-            Cell volCell = row.createCell(c++);
-            volCell.setCellStyle(decimalStyle);
-            volCell.setCellValue(pack.getFoodPackage().getVolumeCoefficient());
+//            Cell volCell = row.createCell(c++);
+//            volCell.setCellStyle(decimalStyle);
+//            volCell.setCellValue(pack.getFoodPackage().getVolumeCoefficient());
+//
+//            Cell addCell = row.createCell(c++);
+//            addCell.setCellStyle(decimalStyle);
+//            addCell.setCellValue(pack.getFoodPackage().getAdditionalWeight());
 
-            Cell addCell = row.createCell(c++);
-            addCell.setCellStyle(decimalStyle);
-            addCell.setCellValue(pack.getFoodPackage().getAdditionalWeight());
-
-            double fullWeight = pack.getEstimatedWeight();
+            double fullWeight = pack.getProductsWeight();
             Cell fullCell = row.createCell(c++);
             fullCell.setCellStyle(decimalStyle);
             fullCell.setCellValue(fullWeight);
 
             for (LocalDate day : reversedDates) {
-                double dayWeight = pack.getWeightForDay(day, membersCount);
+                double dayWeight = pack.getWeightForDay(day);
                 Cell cell = row.createCell(c++);
                 cell.setCellStyle(decimalStyle);
                 cell.setCellValue(dayWeight);

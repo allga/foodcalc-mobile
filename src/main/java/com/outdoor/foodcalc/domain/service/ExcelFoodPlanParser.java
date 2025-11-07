@@ -85,9 +85,9 @@ public class ExcelFoodPlanParser {
 
             if (packagesSheet != null) {
                 Row header = packagesSheet.getRow(0);
-                // перші 4 колонки: name, vol coef, addPack, full
+                // перші 2 колонки: name, full
                 List<LocalDate> dates = new ArrayList<>();
-                for (int i = 4; i < header.getLastCellNum(); i++) {
+                for (int i = 2; i < header.getLastCellNum(); i++) {
                     Cell c = header.getCell(i);
                     if (c != null && c.getCellType() == CellType.STRING) {
                         dates.add(LocalDate.parse(c.getStringCellValue(), DATE_FMT));
@@ -99,12 +99,10 @@ public class ExcelFoodPlanParser {
                     if (row == null) continue;
 
                     String name = row.getCell(0).getStringCellValue().trim();
-                    double vol = getNumericCellValueSafe(row.getCell(1));
-                    double addW = getNumericCellValueSafe(row.getCell(2));
-                    double fullW = getNumericCellValueSafe(row.getCell(3));
+                    double fullW = getNumericCellValueSafe(row.getCell(1));
 
                     Map<LocalDate, Double> dayWeights = new LinkedHashMap<>();
-                    int daysStartCol  = 4;
+                    int daysStartCol  = 2;
                     for (LocalDate d : dates) {
                         Cell weightCell = row.getCell(daysStartCol++);
                         if (weightCell != null && weightCell.getCellType() == CellType.NUMERIC) {
@@ -116,8 +114,6 @@ public class ExcelFoodPlanParser {
 
                     PackageWithProducts pack = PackageWithProducts.builder()
                             .name(name)
-                            .volumeCoefficient(vol)
-                            .additionalWeight(addW)
                             .fullWeight(fullW)
                             .dayWeights(dayWeights)
                             .build();
